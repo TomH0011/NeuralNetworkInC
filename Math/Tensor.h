@@ -1,4 +1,9 @@
 #pragma once
+#ifndef NEURALNETWORK_TENSOR_H
+#define NEURALNETWORK_TENSOR_H
+
+
+
 typedef struct {
     int nDim;
     int *shape;
@@ -20,7 +25,9 @@ void overwriteTensor(Tensor *tensor, const float *newValues);
 void printTensorShape(Tensor *tensor);
 void printTensorSize(Tensor *tensor);
 void printTensorDimension(Tensor *tensor);
-void printTensorRecursive(const Tensor *tensor, int dim, const int offset);
+void printTensorRecursive(const Tensor *tensor, int dim, int offset);
 void printTensor(const Tensor *tensor);
 Tensor *Multiply(Tensor *tensorA, Tensor *tensorB);
 Tensor *tensorTransposeView(const Tensor *tensor);
+
+#endif //NEURALNETWORK_TENSOR_H

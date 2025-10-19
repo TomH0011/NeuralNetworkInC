@@ -5,4 +5,6 @@ set(CMAKE_C_STANDARD 11)
 
 add_executable(NeuralNetwork main.c
         Math/Tensor.c
-        Math/Tensor.h)
+        Math/Tensor.h
+        Tokeniser/tokeniser.c
+        Tokeniser/tokeniser.h)

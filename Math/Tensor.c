@@ -185,7 +185,6 @@ Tensor *Multiply(Tensor *tensorA, Tensor *tensorB) {
         printf("Invalid tensor or data pointer.\n");
         return NULL;
     }
-
     if (tensorA->total != tensorB->total) {
         printf("Shape mismatch.\n");
         return NULL;
