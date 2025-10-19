@@ -15,5 +15,7 @@ typedef struct {
 
 char* textToChar(const char *text);
 int* textToId(const char *text);
+PairMap* getPairs(int* idArray, int length);
+void deletePairMap(PairMap *pairMap);
 
 #endif //NEURALNETWORK_TOKENISER_H

@@ -7,7 +7,6 @@
 char exampleText[] = "Hello World!";
 
 // input some buffer outputs some array of tokens
-
 char* textToChar(const char *text) {
     // safe size as we don't know how long text could be
     size_t len = strlen(text);
@@ -35,7 +34,7 @@ int* textToId(const char *text) {
 
 // get all pairs and their occurrence and store in UT_hash_handle within PairMap struct
 
-PairMap* getPairsAndOccurences(int* idArray, int length) {
+PairMap* getPairs(int* idArray, int length) {
     if (!idArray || !length) {
         PairMap *res = NULL;
         return res;
@@ -48,7 +47,8 @@ PairMap* getPairsAndOccurences(int* idArray, int length) {
 
         PairMap *entry;
         // This searches our hash map to check if the pair exists
-        HASH_FIND(hh, pairs, key, sizeof(int), entry);
+        // * 2 on the size of int as we have a pair of ints
+        HASH_FIND(hh, pairs, key, sizeof(int) * 2, entry);
 
         // if pair exists increment count
         // else initialise the pair into the hash map
@@ -57,12 +57,25 @@ PairMap* getPairsAndOccurences(int* idArray, int length) {
         }
         else {
             entry = malloc(sizeof(PairMap));
+            if (!entry) {
+                fprintf(stderr, "Memory allocation failed\n");
+                deletePairMap(pairs); // cleanup before returning
+                return NULL;
+            }
             entry->key1 = a;
             entry->key2 = b;
             entry->count = 1;
             HASH_ADD(hh, pairs, key1, sizeof(int)*2, entry);
         }
     }
-    return pairs;
+    return pairs; // caller must call deletePairMap after this has run!!!
+}
+// A bit of a weird cleanup due to how hh works
+void deletePairMap(PairMap *pairMap) {
+    PairMap *current, *temp;
+    HASH_ITER(hh, pairMap, current, temp) {
+        HASH_DELETE(hh, pairMap, current);
+        free(current);
+    }
 }
 
