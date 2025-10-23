@@ -32,6 +32,14 @@ int* textToId(const char *text) {
     return resultArray;
 }
 
+int getSizeOfPairMap(PairMap *pairMap) {
+    int count = 0;
+    PairMap *current, *temp;
+    HASH_ITER(hh, pairMap, current, temp) {
+        count++;
+    }
+    return count;
+}
 // get all pairs and their occurrence and store in UT_hash_handle within PairMap struct
 
 PairMap* getPairs(int* idArray, int length) {
@@ -70,6 +78,54 @@ PairMap* getPairs(int* idArray, int length) {
     }
     return pairs; // caller must call deletePairMap after this has run!!!
 }
+
+// searches for the highest value in the hashmap, returns the key
+// user shouldn't have to remember to free the pairMap
+int *findMaxKeyValuePairInPairMap(PairMap *pairMap) {
+    int currentMaxFrequency = -1;
+    int *maxPair = malloc(2 * sizeof(int));
+    PairMap *current, *temp;
+    HASH_ITER(hh, pairMap, current, temp) {
+        if (current->count > currentMaxFrequency) {
+            currentMaxFrequency = current->count;
+            maxPair[0] = current->key1;
+            maxPair[1] = current->key2;
+        };
+    }
+    deletePairMap(pairMap);
+    return maxPair;
+}
+// take the pair, create a new unseen byte with it, add it back to the byte array in correct spot
+int *replaceMostCommonPairWithNewByte(
+    int *idArray,
+    int length,
+    const int *mostCommonPair,
+    int newByte,
+    int *outNewLength) {
+
+    int a = mostCommonPair[0];
+    int b = mostCommonPair[1];
+
+    // worst case is no replacements where newLength <= oldLength
+    // construct the new array instead of putting into old one :)
+    int *newArray = malloc(length * sizeof(int));
+    if (!newArray) return NULL;
+
+    int j = 0;
+    for (int i = 0; i < length; i++) {
+        // Check if this and next form the target pair
+        if (i < length - 1 && idArray[i] == a && idArray[i + 1] == b) {
+            newArray[j++] = newByte;
+            i++;  // skip next token, it's part of the merged pair
+        } else {
+            newArray[j++] = idArray[i];
+        }
+    }
+    *outNewLength = j;
+    return newArray;
+}
+
+
 // A bit of a weird cleanup due to how hh works
 void deletePairMap(PairMap *pairMap) {
     PairMap *current, *temp;
@@ -77,5 +133,6 @@ void deletePairMap(PairMap *pairMap) {
         HASH_DELETE(hh, pairMap, current);
         free(current);
     }
+    pairMap = NULL;
 }
 
