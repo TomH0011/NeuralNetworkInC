@@ -4,15 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-// null terminated :)
-char exampleText[] = "Hello World!";
-
+// note we will need a total vocab size so when we
 // input some buffer outputs some array of tokens
 char* textToChar(const char *text) {
     // safe size as we don't know how long text could be
     size_t len = strlen(text);
     char *resultArray = calloc(strlen(text) + 1, sizeof(char));
-    for (int i = 0; i < strlen(text); i++) {
+    for (int i = 0; i < len; i++) {
         resultArray[i] = text[i];
     }
     return resultArray;
@@ -55,7 +53,7 @@ int getSizeOfPairMap(PairMap *pairMap) {
 }
 // get all pairs and their occurrence and store in UT_hash_handle within PairMap struct
 
-PairMap* getPairs(int* idArray, int length) {
+PairMap* getPairs(const int* idArray, int length) {
     if (!idArray || !length) {
         PairMap *res = NULL;
         return res;
@@ -110,14 +108,14 @@ int *findMaxKeyValuePairInPairMap(PairMap *pairMap) {
 }
 // take the pair, create a new unseen byte with it, add it back to the byte array in correct spot
 int *replaceMostCommonPairWithNewByte(
-    int *idArray,
+    const int *idArray,
     int length,
     const int *mostCommonPair,
     int newByte,
     int *outNewLength) {
 
-    int a = mostCommonPair[0];
-    int b = mostCommonPair[1];
+    const int a = mostCommonPair[0];
+    const int b = mostCommonPair[1];
 
     // worst case is no replacements where newLength <= oldLength
     // construct the new array instead of putting into old one :)

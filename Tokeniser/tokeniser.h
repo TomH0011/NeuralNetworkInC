@@ -24,7 +24,7 @@ char* decodeText(const int *tokenArray, size_t length);
 
 // Builds a PairMap of all consecutive integer pairs and their counts.
 // Caller must later call deletePairMap() on the returned map.
-PairMap* getPairs(int* idArray, int length);
+PairMap* getPairs(const int* idArray, int length);
 
 // Frees all entries in the given PairMap.
 void deletePairMap(PairMap *pairMap);
@@ -36,7 +36,7 @@ int* findMaxKeyValuePairInPairMap(PairMap *pairMap);
 // Replaces the given pair with a new token ID in the sequence.
 // Returns a malloc'd array of new tokens (caller must free).
 int* replaceMostCommonPairWithNewByte(
-    int *idArray,
+    const int *idArray,
     int length,
     const int *mostCommonPair,
     int newByte,
