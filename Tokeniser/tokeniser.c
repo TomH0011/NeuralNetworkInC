@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// null terminated :)
 char exampleText[] = "Hello World!";
 
 // input some buffer outputs some array of tokens
@@ -17,7 +18,7 @@ char* textToChar(const char *text) {
     return resultArray;
 }
 
-int* textToId(const char *text) {
+int* encodeText(const char *text) {
     if (!text) {
         printf("No pointer pointing to text, make sure data is uploaded correctly");
         return NULL;
@@ -30,6 +31,18 @@ int* textToId(const char *text) {
         resultArray[i] = (unsigned char)text[i];
     }
     return resultArray;
+}
+
+char* decodeText(const int *tokenArray, size_t length) {
+    if (!tokenArray || length == 0) return NULL;
+
+    char *resultText = calloc(length + 1, sizeof(char));  // +1 for null terminator
+    for (size_t i = 0; i < length; i++) {
+        resultText[i] = (char)tokenArray[i];  // each token is a byte value
+    }
+
+    resultText[length] = '\0';
+    return resultText;  // caller must free()
 }
 
 int getSizeOfPairMap(PairMap *pairMap) {

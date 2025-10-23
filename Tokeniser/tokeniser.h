@@ -17,7 +17,10 @@ char* textToChar(const char *text);
 
 // Converts input text to an array of integer token IDs.
 // Caller must free the returned pointer.
-int* textToId(const char *text);
+int* encodeText(const char *text);
+
+// Converts array of tokens back into text
+char* decodeText(const int *tokenArray, size_t length);
 
 // Builds a PairMap of all consecutive integer pairs and their counts.
 // Caller must later call deletePairMap() on the returned map.
