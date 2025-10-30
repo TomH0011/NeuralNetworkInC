@@ -1,6 +1,7 @@
 #pragma once
 #ifndef NEURALNETWORK_TENSOR_H
 #define NEURALNETWORK_TENSOR_H
+#include <stdbool.h>
 
 
 
@@ -27,7 +28,10 @@ void printTensorSize(Tensor *tensor);
 void printTensorDimension(Tensor *tensor);
 void printTensorRecursive(const Tensor *tensor, int dim, int offset);
 void printTensor(const Tensor *tensor);
-Tensor *Multiply(Tensor *tensorA, Tensor *tensorB);
+// Tensor *Multiply(Tensor *tensorA, Tensor *tensorB);
+int findContractableDims(const Tensor *A, const Tensor *B,
+                         int **axesA_out, int **axesB_out);
+Tensor *matVecMultiply(Tensor *A, Tensor *B);
 Tensor *tensorTransposeView(const Tensor *tensor);
 
 #endif //NEURALNETWORK_TENSOR_H

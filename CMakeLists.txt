@@ -9,4 +9,6 @@ add_executable(NeuralNetwork main.c
         Tokeniser/tokeniser.c
         Tokeniser/tokeniser.h
         Math/Softmax.c
-        Math/Softmax.h)
+        Math/Softmax.h
+        Transformer/SelfAttenion.c
+        Transformer/SelfAttenion.h)
