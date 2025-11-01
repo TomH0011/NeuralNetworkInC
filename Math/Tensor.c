@@ -383,7 +383,7 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
 }
 
 
-
+// calculates the transpose of the tensor
 Tensor *tensorTransposeView(const Tensor *tensor) {
     if (!tensor) return NULL;
 

@@ -8,7 +8,7 @@
 // input some buffer outputs some array of tokens
 char* textToChar(const char *text) {
     // safe size as we don't know how long text could be
-    size_t len = strlen(text);
+    const size_t len = strlen(text);
     char *resultArray = calloc(strlen(text) + 1, sizeof(char));
     for (int i = 0; i < len; i++) {
         resultArray[i] = text[i];
@@ -22,7 +22,7 @@ int* encodeText(const char *text) {
         return NULL;
     }
     // again size_t to be safe
-    size_t len = strlen(text);
+    const size_t len = strlen(text);
     int *resultArray = calloc(len, sizeof(int));
 
     for (int i = 0; i < len; i++) {
@@ -34,13 +34,21 @@ int* encodeText(const char *text) {
 char* decodeText(const int *tokenArray, size_t length) {
     if (!tokenArray || length == 0) return NULL;
 
-    char *resultText = calloc(length + 1, sizeof(char));  // +1 for null terminator
+    char *resultText = calloc(length * 5 + 1, sizeof(char)); // up to "256 " per token
+
     for (size_t i = 0; i < length; i++) {
-        resultText[i] = (char)tokenArray[i];  // each token is a byte value
+        if (tokenArray[i] >= 32 && tokenArray[i] <= 126) {
+            // printable ASCII
+            resultText[strlen(resultText)] = (char)tokenArray[i];
+        } else {
+            // represent non-printables as numbers
+            char buf[8];
+            sprintf(buf, "[%d]", tokenArray[i]);
+            strcat(resultText, buf);
+        }
     }
 
-    resultText[length] = '\0';
-    return resultText;  // caller must free()
+    return resultText;
 }
 
 int getSizeOfPairMap(PairMap *pairMap) {
@@ -51,8 +59,8 @@ int getSizeOfPairMap(PairMap *pairMap) {
     }
     return count;
 }
-// get all pairs and their occurrence and store in UT_hash_handle within PairMap struct
 
+// get all pairs and their occurrence and store in UT_hash_handle within PairMap struct
 PairMap* getPairs(const int* idArray, int length) {
     if (!idArray || !length) {
         PairMap *res = NULL;

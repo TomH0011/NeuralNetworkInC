@@ -26,7 +26,6 @@ Tensor *attention(Tensor *Q, Tensor *K, Tensor *V) {
     Tensor *probs  = softmax(scores);
     Tensor *output = matVecMultiply(probs, V);
 
-    // Clean up intermediate results if you malloc inside those functions
     deleteTensor(K_T);
     deleteTensor(scores);
     deleteTensor(probs);
