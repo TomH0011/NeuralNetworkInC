@@ -1,12 +1,35 @@
 #include "SelfAttenion.h"
 #include "../Math/Tensor.h"
+#include "../Math/Softmax.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 
-// construct Q K V vectors
+// Take in vec_Q, vec_K, vec_V
 // Where
 // W_k vec_E_i = vec_K_i
 // W_V vec_E_i = vec_V_i
 // W_Q vec_E_i = vec_Q_i
+// output a vector which is the attention formula
+
+
+Tensor *attention(Tensor *Q, Tensor *K, Tensor *V) {
+    if (!Q || !K || !V) {
+        printf("Unable to feed through attention layer\nArgument error\n");
+        return NULL;
+    }
+
+    // Each helper returns a Tensor*
+    Tensor *K_T = tensorTransposeView(K);
+    Tensor *scores = matVecMultiply(K_T, Q);
+    Tensor *probs  = softmax(scores);
+    Tensor *output = matVecMultiply(probs, V);
+
+    // Clean up intermediate results if you malloc inside those functions
+    deleteTensor(K_T);
+    deleteTensor(scores);
+    deleteTensor(probs);
+
+    return output;
+}

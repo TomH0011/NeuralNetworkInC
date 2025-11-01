@@ -266,7 +266,7 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
         return NULL;
     }
 
-    // Step 1: find contractable dimensions
+    // find contractable dimensions
     int *axesA = NULL, *axesB = NULL;
     const int nContract = findContractableDims(A, B, &axesA, &axesB);
     if (nContract == 0) {
