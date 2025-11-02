@@ -5,6 +5,8 @@
 #include "Tokeniser/tokeniser.h"
 #include "main.h"
 #include "./Tokeniser/RandomWeighting.h"
+#include <windows.h>
+#include <psapi.h>
 
 
 int main(void) {
@@ -17,6 +19,7 @@ int main(void) {
     // Example text just for now, do change later
     const char *exampleText = "hello hello";
     printf("Original text: \"%s\"\n", exampleText);
+    print_resource_usage();
 
     // Encode text -> tokens
     int *encoded = encodeText(exampleText);
@@ -38,6 +41,7 @@ int main(void) {
         // Find all pairs
         PairMap *pairs = getPairs(encoded, len);
         printf("Total unique pairs: %d\n", getSizeOfPairMap(pairs));
+        print_resource_usage();
 
         // Find most frequent pair
         int *maxPair = findMaxKeyValuePairInPairMap(pairs);
@@ -58,10 +62,13 @@ int main(void) {
         printf("Merged tokens: ");
         for (int i = 0; i < newLen; i++) printf("%d ", merged[i]);
         printf("\n");
+        print_resource_usage();
 
         // Cleanup old arrays
         free(encoded);
         free(maxPair);
+
+        void print_resource_usage();
 
         // Update pointers
         encoded = merged;
@@ -86,13 +93,35 @@ int main(void) {
 
     // now turn each token in vocabSize into an embedding vector (randomly initialised)
     // embedding vector is a (1, embeddingDim) shape and has dim = 2
+    print_resource_usage();
 
     const int embeddingMatrixShape[2] = { vocabSize, embeddingDim };
-    Tensor *embeddingMatrix = randomlyWeightSeeded(2, embeddingMatrixShape, 72683486234);
+    const Tensor *embeddingMatrix = randomlyWeightSeeded(2, embeddingMatrixShape, 72683486234);
 
     // check to see it's okay!
     printf("embedding matrix has shape (%d, %d)\n", vocabSize, embeddingDim);
     printf("embedding matrix looks like this:\n");
     printTensorHead(embeddingMatrix, 5);
+    print_resource_usage();
     return 0;
+}
+
+void print_resource_usage() {
+    // Memory
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+    SIZE_T memUsed = pmc.WorkingSetSize; // bytes in use
+    printf("Memory usage: %.2f MB\n", memUsed / (1024.0 * 1024.0));
+
+    // CPU times
+    FILETIME creation, exit, kernel, user;
+    if (GetProcessTimes(GetCurrentProcess(), &creation, &exit, &kernel, &user)) {
+        ULARGE_INTEGER k, u;
+        k.LowPart  = kernel.dwLowDateTime;
+        k.HighPart = kernel.dwHighDateTime;
+        u.LowPart  = user.dwLowDateTime;
+        u.HighPart = user.dwHighDateTime;
+        double total = (k.QuadPart + u.QuadPart) / 10000000.0; // convert 100-ns to seconds
+        printf("Total CPU time used: %.3f s\n", total);
+    }
 }
