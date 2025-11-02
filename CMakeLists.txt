@@ -13,4 +13,7 @@ add_executable(NeuralNetwork main.c
         Transformer/SelfAttenion.c
         Transformer/SelfAttenion.h
         Config/config.c
-        Config/config.h)
+        Config/config.h
+        main.h
+        Tokeniser/RandomWeighting.c
+        Tokeniser/RandomWeighting.h)

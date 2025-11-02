@@ -3,11 +3,8 @@
 #include <string.h>
 #include "./Config/config.h"
 #include "Tokeniser/tokeniser.h"
+#include "main.h"
 
-// Optional: pretty printing separator
-void logSeparator(const char *title) {
-    printf("\n==================== %s ====================\n", title);
-}
 
 int main(void) {
     // Initialise global config for things like embedding dim and vocab size
@@ -85,6 +82,8 @@ int main(void) {
     logSeparator("Embedding Construction");
     printf("Now ready to create embedding matrix of shape: [%d, %d]\n",
            vocabSize, embeddingDim);
+
+    // now turn each token in vocabSize into an embedding vector (randomly initialised)
 
     return 0;
 }
