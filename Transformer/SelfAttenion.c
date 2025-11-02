@@ -7,7 +7,7 @@
 
 
 // Take in vec_Q, vec_K, vec_V
-// Where
+// Where:
 // W_k vec_E_i = vec_K_i
 // W_V vec_E_i = vec_V_i
 // W_Q vec_E_i = vec_Q_i

@@ -7,9 +7,9 @@
 #include "../Math/Tensor.h"
 
 // Creates a tensor and randomly weights it between -5000 and 5000 for a given seed
-Tensor *randomlyWeightSeeded(const int nDim, const int *shape, unsigned long long seed);
+Tensor *randomlyWeightSeeded(int nDim, const int *shape, unsigned long long seed);
 
 // Creates a tensor and randomly weights it between -5000 and 5000 (Unseeded)
-Tensor *randomlyWeight(const int nDim, const int *shape);
+Tensor *randomlyWeight(int nDim, const int *shape);
 
 #endif //NEURALNETWORK_RANDOMWEIGHTING_H

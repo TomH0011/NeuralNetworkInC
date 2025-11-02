@@ -1,7 +1,3 @@
-//
-// Created by tomjh on 02/11/2025.
-//
-
 #ifndef NEURALNETWORK_MAIN_H
 #define NEURALNETWORK_MAIN_H
 void logSeparator(const char *title) {

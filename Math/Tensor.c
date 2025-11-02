@@ -179,8 +179,48 @@ void printTensor(const Tensor *tensor) {
     printf("\n");
 }
 
-// TODO: create method print tensor head
+void printTensorHeadRecursive(const Tensor *tensor, const int dim, const int offset, const int limit) {
+    int max_i = tensor->shape[dim] < limit ? tensor->shape[dim] : limit;
 
+    if (dim == tensor->nDim - 1) {
+        printf("[");
+        for (int i = 0; i < max_i; i++) {
+            int idx = offset + i * tensor->stride[dim];
+            printf("%.2f", tensor->data[idx]);
+            if (i < max_i - 1) printf(", ");
+        }
+        if (max_i < tensor->shape[dim]) printf(", ...");
+        printf("]");
+    } else {
+        printf("[");
+        for (int i = 0; i < max_i; i++) {
+            int nextOffset = offset + i * tensor->stride[dim];
+            printTensorHeadRecursive(tensor, dim + 1, nextOffset, limit);
+            if (i < max_i - 1) printf(",\n");
+        }
+        if (max_i < tensor->shape[dim]) printf(", ...\n");
+        printf("]");
+    }
+}
+
+void printTensorHead(const Tensor *tensor, int limit) {
+    if (!tensor) {
+        printf("Tensor is NULL.\n");
+        return;
+    }
+
+    if (limit <= 0) limit = 5; // default
+
+    printf("Tensor(shape=[");
+    for (int i = 0; i < tensor->nDim; i++) {
+        printf("%d", tensor->shape[i]);
+        if (i < tensor->nDim - 1) printf(", ");
+    }
+    printf("]) head(%d) =\n", limit);
+
+    printTensorHeadRecursive(tensor, 0, 0, limit);
+    printf("\n");
+}
 // Now we get on to the fun bit :D
 
 bool isInArray(int value, const int *array, int length) {

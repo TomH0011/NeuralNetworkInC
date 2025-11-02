@@ -4,6 +4,7 @@
 #include "./Config/config.h"
 #include "Tokeniser/tokeniser.h"
 #include "main.h"
+#include "./Tokeniser/RandomWeighting.h"
 
 
 int main(void) {
@@ -84,6 +85,14 @@ int main(void) {
            vocabSize, embeddingDim);
 
     // now turn each token in vocabSize into an embedding vector (randomly initialised)
+    // embedding vector is a (1, embeddingDim) shape and has dim = 2
 
+    const int embeddingMatrixShape[2] = { vocabSize, embeddingDim };
+    Tensor *embeddingMatrix = randomlyWeightSeeded(2, embeddingMatrixShape, 72683486234);
+
+    // check to see it's okay!
+    printf("embedding matrix has shape (%d, %d)\n", vocabSize, embeddingDim);
+    printf("embedding matrix looks like this:\n");
+    printTensorHead(embeddingMatrix, 5);
     return 0;
 }

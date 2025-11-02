@@ -1,6 +1,4 @@
-//
-// Created by tomjh on 23/10/2025.
-//
+
 #include "Softmax.h"
 #include <stdlib.h>
 #include <math.h>

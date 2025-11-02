@@ -1,8 +1,6 @@
 #pragma once
 #ifndef NEURALNETWORK_TENSOR_H
 #define NEURALNETWORK_TENSOR_H
-#include <stdbool.h>
-
 
 
 typedef struct {
@@ -28,6 +26,8 @@ void printTensorSize(Tensor *tensor);
 void printTensorDimension(Tensor *tensor);
 void printTensorRecursive(const Tensor *tensor, int dim, int offset);
 void printTensor(const Tensor *tensor);
+void printTensorHeadRecursive(const Tensor *tensor, int dim, int offset, int limit);
+void printTensorHead(const Tensor *tensor, int limit);
 // Tensor *Multiply(Tensor *tensorA, Tensor *tensorB);
 int findContractableDims(const Tensor *A, const Tensor *B,
                          int **axesA_out, int **axesB_out);
