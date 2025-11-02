@@ -1,9 +1,26 @@
 #include "tokeniser.h"
-
+#include "../Config/config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+
+int *applyMergeStep(const int *encoded, int length, int *new_length) {
+    PairMap *pairs = getPairs(encoded, length);
+    int *maxPair = findMaxKeyValuePairInPairMap(pairs);
+
+    // assign new token ID
+    const int new_token_id = next_token_id;
+    incrementVocab();
+
+    printf("Merging pair [%d, %d] -> new token ID %d\n",
+           maxPair[0], maxPair[1], new_token_id);
+
+    int *merged = replaceMostCommonPairWithNewByte(encoded, length, maxPair, new_token_id, new_length);
+
+    free(maxPair);
+    return merged;
+}
 // note we will need a total vocab size so when we
 // input some buffer outputs some array of tokens
 char* textToChar(const char *text) {

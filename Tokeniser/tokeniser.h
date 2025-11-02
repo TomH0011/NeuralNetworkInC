@@ -11,6 +11,9 @@ typedef struct {
     UT_hash_handle hh;    // uthash handle
 } PairMap;
 
+// applies the actual merge step and tracks vocabSize
+int *applyMergeStep(const int *encoded, int length, int *new_length);
+
 // Converts input text to a dynamically allocated char array.
 // Caller must free the returned pointer.
 char* textToChar(const char *text);

@@ -11,4 +11,6 @@ add_executable(NeuralNetwork main.c
         Math/Softmax.c
         Math/Softmax.h
         Transformer/SelfAttenion.c
-        Transformer/SelfAttenion.h)
+        Transformer/SelfAttenion.h
+        Config/config.c
+        Config/config.h)
