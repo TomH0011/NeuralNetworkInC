@@ -22,7 +22,8 @@ Tensor *attention(Tensor *Q, Tensor *K, Tensor *V) {
 
     // Each helper returns a Tensor*
     Tensor *K_T = tensorTransposeView(K);
-    Tensor *scores = matVecMultiply(K_T, Q);
+    Tensor *scores = matVecMultiply(Q, K_T);
+    scaleTensor(scores, 1.0f / sqrtf(K->shape[1]));
     Tensor *probs  = softmax(scores);
     Tensor *output = matVecMultiply(probs, V);
 
@@ -31,4 +32,11 @@ Tensor *attention(Tensor *Q, Tensor *K, Tensor *V) {
     deleteTensor(probs);
 
     return output;
+}
+
+void scaleTensor(Tensor *tensor, float scale) {
+    if (!tensor) return;
+    for (int i = 0; i < tensor->total; i++) {
+        tensor->data[i] *= scale;
+    }
 }
