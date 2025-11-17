@@ -33,6 +33,7 @@ Tensor *createTensor(const int ndim, const int *shape) {
     tensor->total_valid = 1;
 
     // Allocate data :)
+    // Maybe Malloc???????
     tensor->data = calloc(total, sizeof(float));
 
     return tensor;
@@ -46,6 +47,32 @@ void deleteTensor(Tensor *tensor) {
         free(tensor->data);
     }
     free(tensor);
+}
+// returns 1 if both equal, 0 if not equal
+int equals(Tensor *tensorA, Tensor *tensorB) {
+    if (!tensorA || !tensorB) {
+        printf("Required input: tensorA or tensorB is missing\n");
+        return 0;
+    }
+    if (tensorA->nDim != tensorB->nDim) {
+    return 0;
+    }
+    for (int i = 0; i < tensorA->nDim; i++) {
+        if (tensorA->shape[i] != tensorB->shape[i]) {
+            return 0;
+        }
+    }
+    if (tensorA->total != tensorB->total) {
+        return 0;
+    }
+    // if above isn't true we need to check all the data matches
+    // they're equal if same shape, same nDim, same total elements, and same data
+    for (int i = 0; i < tensorA->total; i++) {
+        if (tensorA->data[i] != tensorB->data[i]) {
+            return 0;
+        }
+    }
+    return 1;
 }
 // hands up if you can guess what this method does!! :0
 Tensor *copyTensor(const Tensor *src) {
@@ -229,28 +256,6 @@ bool isInArray(int value, const int *array, int length) {
     }
     return false;
 }
-// Old Multiplication method
-// Tensor *Multiply(Tensor *tensorA, Tensor *tensorB) {
-//     if (tensorA == NULL || tensorB == NULL ) {
-//         printf("Invalid tensor or data pointer.\n");
-//         return NULL;
-//     }
-//     if (tensorA->total != tensorB->total) {
-//         printf("Shape mismatch.\n");
-//         return NULL;
-//     }
-//     Tensor *result = createTensor(tensorA->nDim, tensorA->shape);
-//     for (int i = 0; i < tensorA->total; i++) {
-//         result->data[i] = tensorA->data[i] * tensorB->data[i];
-//     }
-//     if (result != NULL) {
-//         return result;
-//     }
-//     else {
-//         printf("Multiplication failed.\n");
-//         return NULL;
-//     }
-// }
 
 int findContractableDims(const Tensor *A, const Tensor *B,
                          int **axesA_out, int **axesB_out) {
@@ -306,20 +311,36 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
         return NULL;
     }
 
-    // find contractable dimensions
     int *axesA = NULL, *axesB = NULL;
-    const int nContract = findContractableDims(A, B, &axesA, &axesB);
-    if (nContract == 0) {
-        printf("No contractable dimensions found.\n");
-        return NULL;
+    int nContract = 0;
+
+    // special-case for 2D matrix multiplication: contract A's last dim with B's first dim
+    if (A->nDim == 2 && B->nDim == 2) {
+        if (A->shape[1] != B->shape[0]) {
+            printf("Shape mismatch for 2D matmul: (%d,%d) x (%d,%d)\n",
+                   A->shape[0], A->shape[1],
+                   B->shape[0], B->shape[1]);
+            return NULL;
+        }
+        nContract = 1;
+        axesA = malloc(sizeof(int));
+        axesB = malloc(sizeof(int));
+        axesA[0] = 1;
+        axesB[0] = 0;
+    } else {
+        nContract = findContractableDims(A, B, &axesA, &axesB);
+        if (nContract == 0) {
+            printf("No contractable dimensions found.\n");
+            return NULL;
+        }
     }
 
     printf("Contracting %d dimension(s):\n", nContract);
     for (int i = 0; i < nContract; i++) {
-        printf("  A[%d] <-> B[%d] (size=%d)\n", axesA[i], axesB[i], A->shape[axesA[i]]);
+        printf("  A[%d] <-> B[%d] (size=%d)\n",
+               axesA[i], axesB[i], A->shape[axesA[i]]);
     }
 
-    // build uncontracted dimension lists
     const int nUnA = A->nDim - nContract;
     const int nUnB = B->nDim - nContract;
 
@@ -330,21 +351,20 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
     for (int i = 0; i < A->nDim; i++)
         if (!isInArray(i, axesA, nContract))
             unA[pos++] = i;
+
     pos = 0;
     for (int j = 0; j < B->nDim; j++)
         if (!isInArray(j, axesB, nContract))
             unB[pos++] = j;
 
-    // compute output shape
     const int nDimC = nUnA + nUnB;
     int *shapeC = malloc(sizeof(int) * nDimC);
+
     pos = 0;
     for (int i = 0; i < nUnA; i++) shapeC[pos++] = A->shape[unA[i]];
     for (int j = 0; j < nUnB; j++) shapeC[pos++] = B->shape[unB[j]];
 
-    // this is our resulting tensor!!!!
     Tensor *C = createTensor(nDimC, shapeC);
-
     if (!C) {
         printf("Failed to create result tensor.\n");
         free(shapeC); free(unA); free(unB); free(axesA); free(axesB);
@@ -358,31 +378,25 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
     }
     printf(")\n");
 
-    // prepare iteration
     int *idxC = calloc(nDimC, sizeof(int));
     int *idxA = calloc(A->nDim, sizeof(int));
     int *idxB = calloc(B->nDim, sizeof(int));
     int *idxContract = calloc(nContract, sizeof(int));
 
-    // shapes for contraction
     int *shapeContract = malloc(sizeof(int) * nContract);
     for (int k = 0; k < nContract; k++)
-        shapeContract[k] = A->shape[axesA[k]];  // same as B->shape[axesB[k]]
+        shapeContract[k] = A->shape[axesA[k]];
 
-    // outer loop over all elements of output C and initialise the data to 0
     do {
-        // clear indices
         for (int d = 0; d < A->nDim; d++) idxA[d] = 0;
         for (int d = 0; d < B->nDim; d++) idxB[d] = 0;
 
-        // map idxC -> uncontracted parts of A and B
         int cpos = 0;
         for (int i = 0; i < nUnA; i++)
             idxA[unA[i]] = idxC[cpos++];
         for (int j = 0; j < nUnB; j++)
             idxB[unB[j]] = idxC[cpos++];
 
-        // inner loop over contracted dimensions
         float sum = 0.0f;
         do {
             for (int k = 0; k < nContract; k++) {
@@ -390,8 +404,6 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
                 idxB[axesB[k]] = idxContract[k];
             }
 
-            // compute offsets via strides
-            // recall [a_0, a_1, ... a_nDim] = (shape[0] * a _0) + ... + (shape[nDim] * a_nDim) = data[offset]
             int offsetA = 0, offsetB = 0;
             for (int d = 0; d < A->nDim; d++) offsetA += idxA[d] * A->stride[d];
             for (int d = 0; d < B->nDim; d++) offsetB += idxB[d] * B->stride[d];
@@ -400,14 +412,13 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
 
         } while (nextIndex(shapeContract, nContract, idxContract));
 
-        // assign to result tensor
         int offsetC = 0;
         for (int d = 0; d < nDimC; d++)
             offsetC += idxC[d] * C->stride[d];
         C->data[offsetC] = sum;
 
-        // reset contracted index for next iteration
-        for (int k = 0; k < nContract; k++) idxContract[k] = 0;
+        for (int k = 0; k < nContract; k++)
+            idxContract[k] = 0;
 
     } while (nextIndex(shapeC, nDimC, idxC));
 
@@ -444,6 +455,29 @@ Tensor *tensorTransposeView(const Tensor *tensor) {
 
     out->total = tensor->total;
     out->total_valid = 1;
+    return out;
+}
+
+Tensor *tensorTranspose2D(const Tensor *A) {
+    if (A->nDim != 2) return NULL;
+
+    Tensor *out = malloc(sizeof(Tensor));
+    out->nDim = 2;
+    out->isOwner = 0;
+    out->data = A->data;
+
+    out->shape = malloc(sizeof(int) * 2);
+    out->stride = malloc(sizeof(int) * 2);
+
+    out->shape[0] = A->shape[1];
+    out->shape[1] = A->shape[0];
+
+    out->stride[1] = 1;
+    out->stride[0] = out->shape[1];
+
+    out->total = A->total;
+    out->total_valid = 1;
+
     return out;
 }
 

@@ -16,4 +16,6 @@ add_executable(NeuralNetwork main.c
         Config/config.h
         main.h
         Tokeniser/RandomWeighting.c
-        Tokeniser/RandomWeighting.h)
+        Tokeniser/RandomWeighting.h
+        Transformer/MLP.c
+        Transformer/MLP.h)

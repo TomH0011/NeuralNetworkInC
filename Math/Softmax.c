@@ -7,7 +7,6 @@
 Tensor *softmax(Tensor *tensor) {
     if (!tensor || tensor->total <= 0) return tensor;
 
-    const float beta = 1.0f;
     float maxVal = tensor->data[0];
 
     // find max for numerical stability
@@ -18,6 +17,7 @@ Tensor *softmax(Tensor *tensor) {
     // Compute exp(x - max) * beta  and accumulate sum
     float sum = 0.0f;
     for (int i = 0; i < tensor->total; i++) {
+        const float beta = 1.0f;
         tensor->data[i] = expf(beta * (tensor->data[i] - maxVal));
         sum += tensor->data[i];
     }

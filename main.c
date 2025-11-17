@@ -5,11 +5,14 @@
 #include "Tokeniser/tokeniser.h"
 #include "main.h"
 #include "./Tokeniser/RandomWeighting.h"
+#include "./Transformer/SelfAttenion.h"
 #include <windows.h>
 #include <psapi.h>
 
 
 int main(void) {
+
+    const int SEED = 12345;
     // Initialise global config for things like embedding dim and vocab size
     initConfig();
     printf("Initial configuration:\n");
@@ -84,8 +87,6 @@ int main(void) {
     char *decoded = decodeText(encoded, len);
     printf("Decoded representation: %s\n", decoded);
 
-    free(encoded);
-    free(decoded);
 
     logSeparator("Embedding Construction");
     printf("Now ready to create embedding matrix of shape: [%d, %d]\n",
@@ -96,12 +97,71 @@ int main(void) {
     print_resource_usage();
 
     const int embeddingMatrixShape[2] = { vocabSize, embeddingDim };
-    const Tensor *embeddingMatrix = randomlyWeightSeeded(2, embeddingMatrixShape, 72683486234);
+    // SHOULD THIS BE CONST => DOES embeddingMatrix GET UPDATE
+    const Tensor *embeddingMatrix = randomlyWeightSeeded(2, embeddingMatrixShape, SEED);
 
     // check to see it's okay!
     printf("embedding matrix has shape (%d, %d)\n", vocabSize, embeddingDim);
     printf("embedding matrix looks like this:\n");
     printTensorHead(embeddingMatrix, 5);
+    print_resource_usage();
+
+    // want to pass it through the self attention layer
+    // create K, Q, V vectors, send to attention print result of tensor
+    // recall mat_W_Q @ vec_E_i = vec_Q_i
+    logSeparator("Q, K, V Vector Construction");
+    int Wshape[2] = { embeddingDim, embeddingDim };
+
+    Tensor *W_Q = randomlyWeightSeeded(2, Wshape, SEED);
+    Tensor *W_K = randomlyWeightSeeded(2, Wshape, SEED);
+    Tensor *W_V = randomlyWeightSeeded(2, Wshape, SEED);
+
+    int Xshape[2] = { len, embeddingDim };
+    Tensor *X = createTensor(2, Xshape);
+
+    for (int i = 0; i < len; i++) {
+        int tokenId = encoded[i];
+        int embOffset = tokenId * embeddingDim;
+        int rowOffset = i * embeddingDim;
+
+        for (int j = 0; j < embeddingDim; j++) {
+            X->data[rowOffset + j] = embeddingMatrix->data[embOffset + j];
+        }
+    }
+
+    Tensor *Q = matVecMultiply(X, W_Q);  // (T, d) x (d, d) -> (T, d)
+    Tensor *K = matVecMultiply(X, W_K);  // (T, d)
+    Tensor *V = matVecMultiply(X, W_V);  // (T, d)
+
+    printf("The tensor heads for Q, K, and V are: \n");
+    printf("Tensor Q: \n");
+    printTensorHead(Q, 3);
+    printf("Tensor K: \n");
+    printTensorHead(K, 3);
+    printf("Tensor V: \n");
+    printTensorHead(V, 3);
+
+    print_resource_usage();
+
+    logSeparator("Attention Layer");
+
+    Tensor *out = attention(Q, K, V);
+    if (!out) {
+        printf("Attention Layer error\n");
+        return 1;
+    }
+    printf("Tensor out is: \n");
+    printTensorHead(out, 3);
+
+    int WoutShape[2] = { embeddingDim, vocabSize };
+    Tensor *W_out = randomlyWeightSeeded(2, WoutShape, SEED+1);
+
+    Tensor *logits = matVecMultiply(out, W_out);
+    printTensorHead(logits, 3);
+
+    free(encoded);
+    free(decoded);
+
     print_resource_usage();
     return 0;
 }
@@ -110,7 +170,7 @@ void print_resource_usage() {
     // Memory
     PROCESS_MEMORY_COUNTERS_EX pmc;
     GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-    SIZE_T memUsed = pmc.WorkingSetSize; // bytes in use
+    const SIZE_T memUsed = pmc.WorkingSetSize; // bytes in use
     printf("Memory usage: %.2f MB\n", memUsed / (1024.0 * 1024.0));
 
     // CPU times

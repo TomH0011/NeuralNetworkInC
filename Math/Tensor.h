@@ -16,6 +16,7 @@ typedef struct {
 
 Tensor *createTensor(int ndim, const int *shape);
 void deleteTensor(Tensor *tensor);
+int equals(Tensor *tensorA, Tensor *tensorB);
 float getValue(Tensor *tensor, const int *indices);
 float getValueFlat(Tensor *tensor, int position);
 void setValue(Tensor *tensor, const int *indices, const float *values);
@@ -33,5 +34,6 @@ int findContractableDims(const Tensor *A, const Tensor *B,
                          int **axesA_out, int **axesB_out);
 Tensor *matVecMultiply(Tensor *A, Tensor *B);
 Tensor *tensorTransposeView(const Tensor *tensor);
+Tensor *tensorTranspose2D(const Tensor *A);
 
 #endif //NEURALNETWORK_TENSOR_H
