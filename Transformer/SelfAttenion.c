@@ -27,30 +27,30 @@ Tensor *attention(Tensor *Q, Tensor *K, Tensor *V) {
     }
 
     // Each helper returns a Tensor*
-    printf("Trying to transpose: \n");
+    // printf("Trying to transpose: \n");
     Tensor *K_T = tensorTranspose2D(K);
     int equalTP = (equals(K_T, K)) ? 1 : 0;
     if (equalTP) {
         printf("Failure to Transpose... \n");
     }
 
-    printf("Trying to Multiply for the first time: \n");
+    // printf("Trying to Multiply for the first time: \n");
     Tensor *scores = matVecMultiply(Q, K_T);
     int equalM = (equals(K_T, K)) ? 1 : 0;
     if (equalM) {
         printf("Failure to Multiply the first time... \n");
     }
-    printf("Trying to Scale: \n");
+    // printf("Trying to Scale: \n");
     scaleTensor(scores, 1.0f / sqrtf(K->shape[1]));
 
-    printf("Trying to Softmax: \n");
-    Tensor *probs  = softmax(scores);
+    // printf("Trying to Softmax: \n");
+    Tensor *probs  = softmax2D(scores);
     int equalSM = (equals(K_T, K)) ? 1 : 0;
     if (equalSM) {
         printf("Failure to SoftMax... \n");
     }
 
-    printf("Trying to Multiply for the second time: \n");
+    // printf("Trying to Multiply for the second time: \n");
     Tensor *output = matVecMultiply(probs, V);
     int equalM2 = (equals(K_T, K)) ? 1 : 0;
     if (equalM2) {
@@ -63,7 +63,6 @@ Tensor *attention(Tensor *Q, Tensor *K, Tensor *V) {
 
     deleteTensor(K_T);
     deleteTensor(scores);
-    deleteTensor(probs);
 
     return output;
 }

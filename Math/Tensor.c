@@ -463,7 +463,7 @@ Tensor *tensorTranspose2D(const Tensor *A) {
 
     Tensor *out = malloc(sizeof(Tensor));
     out->nDim = 2;
-    out->isOwner = 0;
+    out->isOwner = 0; // view not owner now
     out->data = A->data;
 
     out->shape = malloc(sizeof(int) * 2);
@@ -472,8 +472,8 @@ Tensor *tensorTranspose2D(const Tensor *A) {
     out->shape[0] = A->shape[1];
     out->shape[1] = A->shape[0];
 
-    out->stride[1] = 1;
-    out->stride[0] = out->shape[1];
+    out->stride[0] = A->stride[1];
+    out->stride[1] = A->stride[0];
 
     out->total = A->total;
     out->total_valid = 1;

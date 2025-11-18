@@ -146,18 +146,20 @@ int main(void) {
     logSeparator("Attention Layer");
 
     Tensor *out = attention(Q, K, V);
+
     if (!out) {
         printf("Attention Layer error\n");
         return 1;
     }
+    // info about tensor after attention layer
+    printf("out nDim: %d\n", out->nDim);
+
+    printf("out shape: (" );
+    for (int i = 0; i < out->nDim; i++) printf(" %d", out->shape[i]);
+    printf(")\n");
+
     printf("Tensor out is: \n");
     printTensorHead(out, 3);
-
-    int WoutShape[2] = { embeddingDim, vocabSize };
-    Tensor *W_out = randomlyWeightSeeded(2, WoutShape, SEED+1);
-
-    Tensor *logits = matVecMultiply(out, W_out);
-    printTensorHead(logits, 3);
 
     free(encoded);
     free(decoded);
