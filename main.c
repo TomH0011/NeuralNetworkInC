@@ -8,6 +8,7 @@
 #include "./Transformer/SelfAttenion.h"
 #include <windows.h>
 #include <psapi.h>
+#include <stddef.h>
 
 
 int main(void) {
@@ -26,11 +27,11 @@ int main(void) {
 
     // Encode text -> tokens
     int *encoded = encodeText(exampleText);
-    int len = strlen(exampleText);
+    size_t len = strlen(exampleText);
 
     logSeparator("Initial Tokens");
     printf("Encoded tokens: ");
-    for (int i = 0; i < len; i++) printf("%d ", encoded[i]);
+    for (size_t i = 0; i < len; i++) printf("%d ", encoded[i]);
     printf("\n");
 
     // BPE-style merge loop
@@ -51,27 +52,25 @@ int main(void) {
         printf("Most common pair: [%d, %d]\n", maxPair[0], maxPair[1]);
 
         // Assign new token ID from config
-        int new_token_id = next_token_id;
+        const int new_token_id = next_token_id;
         incrementVocab();
 
         // Replace that pair
-        int newLen;
+        size_t newLen;
         int *merged = replaceMostCommonPairWithNewByte(encoded, len, maxPair, new_token_id, &newLen);
 
         // Log merge details
-        printf("Merged [%d, %d] -> %d | New sequence length: %d\n",
+        printf("Merged [%d, %d] -> %d | New sequence length: %zu\n",
                maxPair[0], maxPair[1], new_token_id, newLen);
 
         printf("Merged tokens: ");
-        for (int i = 0; i < newLen; i++) printf("%d ", merged[i]);
+        for (size_t i = 0; i < newLen; i++) printf("%d ", merged[i]);
         printf("\n");
         print_resource_usage();
 
         // Cleanup old arrays
         free(encoded);
         free(maxPair);
-
-        void print_resource_usage();
 
         // Update pointers
         encoded = merged;
@@ -96,9 +95,11 @@ int main(void) {
     // embedding vector is a (1, embeddingDim) shape and has dim = 2
     print_resource_usage();
 
-    const int embeddingMatrixShape[2] = { vocabSize, embeddingDim };
+    const size_t embeddingMatrixShape[2] = { (size_t)vocabSize, (size_t)embeddingDim };
     // SHOULD THIS BE CONST => DOES embeddingMatrix GET UPDATE
     const Tensor *embeddingMatrix = randomlyWeightSeeded(2, embeddingMatrixShape, SEED);
+
+    if (!embeddingMatrix) return 1;
 
     // check to see it's okay!
     printf("embedding matrix has shape (%d, %d)\n", vocabSize, embeddingDim);
@@ -110,19 +111,19 @@ int main(void) {
     // create K, Q, V vectors, send to attention print result of tensor
     // recall mat_W_Q @ vec_E_i = vec_Q_i
     logSeparator("Q, K, V Vector Construction");
-    int Wshape[2] = { embeddingDim, embeddingDim };
+    size_t Wshape[2] = { (size_t)embeddingDim, (size_t)embeddingDim };
 
     Tensor *W_Q = randomlyWeightSeeded(2, Wshape, SEED);
     Tensor *W_K = randomlyWeightSeeded(2, Wshape, SEED);
     Tensor *W_V = randomlyWeightSeeded(2, Wshape, SEED);
 
-    int Xshape[2] = { len, embeddingDim };
+    const size_t Xshape[2] = { len, embeddingDim };
     Tensor *X = createTensor(2, Xshape);
 
-    for (int i = 0; i < len; i++) {
-        int tokenId = encoded[i];
-        int embOffset = tokenId * embeddingDim;
-        int rowOffset = i * embeddingDim;
+    for (size_t i = 0; i < len; i++) {
+        const int tokenId = encoded[i];
+        const int embOffset = tokenId * embeddingDim;
+        const int rowOffset = i * embeddingDim;
 
         for (int j = 0; j < embeddingDim; j++) {
             X->data[rowOffset + j] = embeddingMatrix->data[embOffset + j];

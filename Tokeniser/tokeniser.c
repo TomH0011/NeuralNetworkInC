@@ -78,7 +78,7 @@ int getSizeOfPairMap(PairMap *pairMap) {
 }
 
 // get all pairs and their occurrence and store in UT_hash_handle within PairMap struct
-PairMap* getPairs(const int* idArray, int length) {
+PairMap* getPairs(const int* idArray, size_t length) {
     if (!idArray || !length) {
         PairMap *res = NULL;
         return res;
@@ -134,10 +134,10 @@ int *findMaxKeyValuePairInPairMap(PairMap *pairMap) {
 // take the pair, create a new unseen byte with it, add it back to the byte array in correct spot
 int *replaceMostCommonPairWithNewByte(
     const int *idArray,
-    int length,
+    const size_t length,
     const int *mostCommonPair,
-    int newByte,
-    int *outNewLength) {
+    const int newByte,
+    size_t *outNewLength) {
 
     const int a = mostCommonPair[0];
     const int b = mostCommonPair[1];
@@ -147,8 +147,8 @@ int *replaceMostCommonPairWithNewByte(
     int *newArray = malloc(length * sizeof(int));
     if (!newArray) return NULL;
 
-    int j = 0;
-    for (int i = 0; i < length; i++) {
+    size_t j = 0;
+    for (size_t i = 0; i < length; i++) {
         // Check if this and next form the target pair
         if (i < length - 1 && idArray[i] == a && idArray[i + 1] == b) {
             newArray[j++] = newByte;

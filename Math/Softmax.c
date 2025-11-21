@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "Tensor.h"
+#include <stddef.h>
 
 Tensor *softmax(Tensor *tensor) {
     if (!tensor || tensor->total <= 0) return tensor;
@@ -10,7 +11,7 @@ Tensor *softmax(Tensor *tensor) {
     float maxVal = tensor->data[0];
 
     // find max for numerical stability
-    for (int i = 1; i < tensor->total; i++)
+    for (size_t i = 1; i < tensor->total; i++)
         if (tensor->data[i] > maxVal)
             maxVal = tensor->data[i];
 
@@ -32,9 +33,9 @@ Tensor *softmax(Tensor *tensor) {
 Tensor *softmax2D(Tensor *tensor) {
     const int rows = tensor->shape[0];
     const int cols = tensor->shape[1];
-    for (int r = 0; r < rows; r++) {
+    for (size_t r = 0; r < rows; r++) {
         float maxVal = tensor->data[r * cols];
-        for (int c = 1; c < cols; c++) {
+        for (size_t c = 1; c < cols; c++) {
             const float v = tensor->data[r * cols + c];
             if (v > maxVal) maxVal = v;
         }
@@ -44,7 +45,7 @@ Tensor *softmax2D(Tensor *tensor) {
             tensor->data[r * cols + c] = e;
             sum += e;
         }
-        for (int c = 0; c < cols; c++)
+        for (size_t c = 0; c < cols; c++)
             tensor->data[r * cols + c] /= sum;
     }
     return tensor;

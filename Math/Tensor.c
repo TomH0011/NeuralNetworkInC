@@ -4,21 +4,22 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stddef.h>
 
-Tensor *createTensor(const int ndim, const int *shape) {
+Tensor *createTensor(const int ndim, const size_t *shape) {
     Tensor *tensor = malloc(sizeof(Tensor));
     if (!tensor) {
         printf("Failed to allocate memory for Tensor\n");
         return NULL;
     }
     tensor->nDim = ndim;
-    tensor->shape = malloc(sizeof(int) * ndim);
-    tensor->stride = malloc(sizeof(int) * ndim);
+    tensor->shape = malloc(sizeof(size_t) * ndim);
+    tensor->stride = malloc(sizeof(size_t) * ndim);
     tensor->total_valid = 0;
     tensor->isOwner = 0;
 
     // Copy shape
-    memcpy(tensor->shape, shape, sizeof(int) * ndim);
+    memcpy(tensor->shape, shape, sizeof(size_t) * ndim);
 
     // Calculate strides
     tensor->stride[ndim - 1] = 1;
@@ -27,7 +28,7 @@ Tensor *createTensor(const int ndim, const int *shape) {
     }
 
     // Calculate total number of elements
-    int total = 1;
+    size_t total = 1;
     for (int j = 0; j < ndim; j++) total *= shape[j];
     tensor->total = total;
     tensor->total_valid = 1;
@@ -143,20 +144,11 @@ void overwriteTensor(Tensor *tensor, const float *newValues) {
 
 void printTensorShape(Tensor *tensor) {
     if (!tensor) return;
+    printf("The Tensor has shape: ");
     for (int i = 0; i < tensor->nDim; i++) {
-        printf("The Tensor has shape: ");
-        printf(" %d\n", tensor->shape[i]);
+        printf(" %zu", tensor->shape[i]);
     }
-}
-
-void printTensorSize(Tensor *tensor) {
-    if (!tensor) return;
-    int elements = 0;
-    printf("The tensor has size (# of elements): ");
-    for (int i = 0; i < tensor->nDim; i++) {
-        elements *= tensor->shape[i];
-    }
-    printf("%d\n", elements);
+    printf("\n");
 }
 
 void printTensorDimension(Tensor *tensor) {
@@ -165,11 +157,11 @@ void printTensorDimension(Tensor *tensor) {
 }
 
 // recursive helper to essentially pretty print the tensor
-void printTensorRecursive(const Tensor *tensor, const int dim, const int offset) {
+void printTensorRecursive(const Tensor *tensor, const int dim, const size_t offset) {
     if (dim == tensor->nDim - 1) {
         printf("[");
         for (int i = 0; i < tensor->shape[dim]; i++) {
-            int idx = offset + i * tensor->stride[dim];
+            const size_t idx = offset + i * tensor->stride[dim];
             printf("%.2f", tensor->data[idx]);
             if (i < tensor->shape[dim] - 1)
                 printf(", ");
@@ -178,7 +170,7 @@ void printTensorRecursive(const Tensor *tensor, const int dim, const int offset)
     } else {
         printf("[");
         for (int i = 0; i < tensor->shape[dim]; i++) {
-            int nextOffset = offset + i * tensor->stride[dim];
+            const size_t nextOffset = offset + i * tensor->stride[dim];
             printTensorRecursive(tensor, dim + 1, nextOffset);
             if (i < tensor->shape[dim] - 1)
                 printf(",\n");
@@ -197,7 +189,7 @@ void printTensor(const Tensor *tensor) {
 
     printf("Tensor(shape=[");
     for (int i = 0; i < tensor->nDim; i++) {
-        printf("%d", tensor->shape[i]);
+        printf("%zu", tensor->shape[i]);
         if (i < tensor->nDim - 1) printf(", ");
     }
     printf("]) =\n");
@@ -206,13 +198,13 @@ void printTensor(const Tensor *tensor) {
     printf("\n");
 }
 
-void printTensorHeadRecursive(const Tensor *tensor, const int dim, const int offset, const int limit) {
-    int max_i = tensor->shape[dim] < limit ? tensor->shape[dim] : limit;
+void printTensorHeadRecursive(const Tensor *tensor, const int dim, const size_t offset, const int limit) {
+    const int max_i = tensor->shape[dim] < limit ? tensor->shape[dim] : limit;
 
     if (dim == tensor->nDim - 1) {
         printf("[");
         for (int i = 0; i < max_i; i++) {
-            int idx = offset + i * tensor->stride[dim];
+            const size_t idx = offset + i * tensor->stride[dim];
             printf("%.2f", tensor->data[idx]);
             if (i < max_i - 1) printf(", ");
         }
@@ -221,7 +213,7 @@ void printTensorHeadRecursive(const Tensor *tensor, const int dim, const int off
     } else {
         printf("[");
         for (int i = 0; i < max_i; i++) {
-            int nextOffset = offset + i * tensor->stride[dim];
+            size_t nextOffset = offset + i * tensor->stride[dim];
             printTensorHeadRecursive(tensor, dim + 1, nextOffset, limit);
             if (i < max_i - 1) printf(",\n");
         }
@@ -240,7 +232,7 @@ void printTensorHead(const Tensor *tensor, int limit) {
 
     printf("Tensor(shape=[");
     for (int i = 0; i < tensor->nDim; i++) {
-        printf("%d", tensor->shape[i]);
+        printf("%zu", tensor->shape[i]);
         if (i < tensor->nDim - 1) printf(", ");
     }
     printf("]) head(%d) =\n", limit);
@@ -250,8 +242,8 @@ void printTensorHead(const Tensor *tensor, int limit) {
 }
 // Now we get on to the fun bit :D
 
-bool isInArray(int value, const int *array, int length) {
-    for (int i = 0; i < length; i++) {
+bool isInArray(const int value, const int *array, const size_t length) {
+    for (size_t i = 0; i < length; i++) {
         if (array[i] == value) return true;
     }
     return false;
@@ -292,10 +284,10 @@ int findContractableDims(const Tensor *A, const Tensor *B,
 }
 
 
-// rules are you can multiply tensors as long as the both shapes contract on atleast one dimension
-// this hopefully ammends the previous multiply method
+// rules are you can multiply tensors as long as the both shapes contract on least one dimension
+// this hopefully amends the previous multiply method
 // helper: n-D counter incrementer
-bool nextIndex(const int *shape, int nDim, int *idx) {
+bool nextIndex(const size_t *shape, int nDim, int *idx) {
     for (int d = nDim - 1; d >= 0; d--) {
         idx[d]++;
         if (idx[d] < shape[d])
@@ -317,7 +309,7 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
     // special-case for 2D matrix multiplication: contract A's last dim with B's first dim
     if (A->nDim == 2 && B->nDim == 2) {
         if (A->shape[1] != B->shape[0]) {
-            printf("Shape mismatch for 2D matmul: (%d,%d) x (%d,%d)\n",
+            printf("Shape mismatch for 2D matmul: (%zu,%zu) x (%zu,%zu)\n",
                    A->shape[0], A->shape[1],
                    B->shape[0], B->shape[1]);
             return NULL;
@@ -337,7 +329,7 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
 
     printf("Contracting %d dimension(s):\n", nContract);
     for (int i = 0; i < nContract; i++) {
-        printf("  A[%d] <-> B[%d] (size=%d)\n",
+        printf("  A[%d] <-> B[%d] (size=%zu)\n",
                axesA[i], axesB[i], A->shape[axesA[i]]);
     }
 
@@ -358,7 +350,7 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
             unB[pos++] = j;
 
     const int nDimC = nUnA + nUnB;
-    int *shapeC = malloc(sizeof(int) * nDimC);
+    size_t *shapeC = malloc(sizeof(size_t) * nDimC);
 
     pos = 0;
     for (int i = 0; i < nUnA; i++) shapeC[pos++] = A->shape[unA[i]];
@@ -373,7 +365,7 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
 
     printf("Result tensor shape: (");
     for (int i = 0; i < nDimC; i++) {
-        printf("%d", shapeC[i]);
+        printf("%zu", shapeC[i]);
         if (i < nDimC - 1) printf(", ");
     }
     printf(")\n");
@@ -383,7 +375,7 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
     int *idxB = calloc(B->nDim, sizeof(int));
     int *idxContract = calloc(nContract, sizeof(int));
 
-    int *shapeContract = malloc(sizeof(int) * nContract);
+    size_t *shapeContract = malloc(sizeof(size_t) * nContract);
     for (int k = 0; k < nContract; k++)
         shapeContract[k] = A->shape[axesA[k]];
 
@@ -404,7 +396,7 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
                 idxB[axesB[k]] = idxContract[k];
             }
 
-            int offsetA = 0, offsetB = 0;
+            size_t offsetA = 0, offsetB = 0;
             for (int d = 0; d < A->nDim; d++) offsetA += idxA[d] * A->stride[d];
             for (int d = 0; d < B->nDim; d++) offsetB += idxB[d] * B->stride[d];
 
@@ -412,7 +404,7 @@ Tensor *matVecMultiply(Tensor *A, Tensor *B) {
 
         } while (nextIndex(shapeContract, nContract, idxContract));
 
-        int offsetC = 0;
+        size_t offsetC = 0;
         for (int d = 0; d < nDimC; d++)
             offsetC += idxC[d] * C->stride[d];
         C->data[offsetC] = sum;
@@ -466,8 +458,8 @@ Tensor *tensorTranspose2D(const Tensor *A) {
     out->isOwner = 0; // view not owner now
     out->data = A->data;
 
-    out->shape = malloc(sizeof(int) * 2);
-    out->stride = malloc(sizeof(int) * 2);
+    out->shape = malloc(sizeof(size_t) * 2);
+    out->stride = malloc(sizeof(size_t) * 2);
 
     out->shape[0] = A->shape[1];
     out->shape[1] = A->shape[0];

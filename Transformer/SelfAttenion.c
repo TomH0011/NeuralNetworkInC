@@ -16,7 +16,7 @@
 
 static void scaleTensor(Tensor *tensor, float scale) {
     if (!tensor) return;
-    for (int i = 0; i < tensor->total; i++) {
+    for (size_t i = 0; i < tensor->total; i++) {
         tensor->data[i] *= scale;
     }
 }
@@ -36,7 +36,7 @@ Tensor *attention(Tensor *Q, Tensor *K, Tensor *V) {
 
     // printf("Trying to Multiply for the first time: \n");
     Tensor *scores = matVecMultiply(Q, K_T);
-    int equalM = (equals(K_T, K)) ? 1 : 0;
+    const int equalM = (equals(K_T, K)) ? 1 : 0;
     if (equalM) {
         printf("Failure to Multiply the first time... \n");
     }
@@ -45,14 +45,14 @@ Tensor *attention(Tensor *Q, Tensor *K, Tensor *V) {
 
     // printf("Trying to Softmax: \n");
     Tensor *probs  = softmax2D(scores);
-    int equalSM = (equals(K_T, K)) ? 1 : 0;
+    const int equalSM = (equals(K_T, K)) ? 1 : 0;
     if (equalSM) {
         printf("Failure to SoftMax... \n");
     }
 
     // printf("Trying to Multiply for the second time: \n");
     Tensor *output = matVecMultiply(probs, V);
-    int equalM2 = (equals(K_T, K)) ? 1 : 0;
+    const int equalM2 = (equals(K_T, K)) ? 1 : 0;
     if (equalM2) {
         printf("Failure to Multiply the second time... \n");
     }
