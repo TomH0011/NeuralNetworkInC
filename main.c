@@ -10,6 +10,8 @@
 #include <psapi.h>
 #include <stddef.h>
 
+#include "Tokeniser/PositionalEncoding.h"
+
 
 int main(void) {
 
@@ -109,8 +111,7 @@ int main(void) {
 
     // want to pass it through the self attention layer
     // create K, Q, V vectors, send to attention print result of tensor
-    // recall mat_W_Q @ vec_E_i = vec_Q_i
-    logSeparator("Q, K, V Vector Construction");
+    // recall mat_W_Q @ vec_E_i = vec_Q_i;
     size_t Wshape[2] = { (size_t)embeddingDim, (size_t)embeddingDim };
 
     Tensor *W_Q = randomlyWeightSeeded(2, Wshape, SEED);
@@ -123,13 +124,21 @@ int main(void) {
     for (size_t i = 0; i < len; i++) {
         const int tokenId = encoded[i];
         const int embOffset = tokenId * embeddingDim;
-        const int rowOffset = i * embeddingDim;
+        const size_t rowOffset = i * embeddingDim;
 
         for (int j = 0; j < embeddingDim; j++) {
             X->data[rowOffset + j] = embeddingMatrix->data[embOffset + j];
         }
     }
 
+    logSeparator("adding positional encoding");
+    addPositionalEncoding(X);
+
+    printf("Tensor X after Positional Encoding:\n");
+
+    printTensorHead(X, 5);
+
+    logSeparator("Q, K, V Vector Construction");
     Tensor *Q = matVecMultiply(X, W_Q);  // (T, d) x (d, d) -> (T, d)
     Tensor *K = matVecMultiply(X, W_K);  // (T, d)
     Tensor *V = matVecMultiply(X, W_V);  // (T, d)
