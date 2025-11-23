@@ -182,8 +182,10 @@ void print_resource_usage() {
     // Memory
     PROCESS_MEMORY_COUNTERS_EX pmc;
     GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-    const SIZE_T memUsed = pmc.WorkingSetSize; // bytes in use
-    printf("Memory usage: %.2f MB\n", memUsed / (1024.0 * 1024.0));
+    // const SIZE_T memUsed = pmc.WorkingSetSize; // bytes in use
+    SIZE_T virtualMemUsed = pmc.PrivateUsage;
+    // printf("Memory usage: %.2f MB\n", memUsed / (1024.0 * 1024.0));
+    printf("Private Memory (Committed): %.2f MB\n", virtualMemUsed / (1024.0 * 1024.0));
 
     // CPU times
     FILETIME creation, exit, kernel, user;
