@@ -1,9 +1,7 @@
-
-#include "Softmax.h"
+#include "../../../include/deepc/backend.h"
 #include <stdlib.h>
 #include <math.h>
-#include "Tensor.h"
-#include <stddef.h>
+#include "../../../include/deepc/tensor.h"
 
 Tensor *softmax(Tensor *tensor) {
     if (!tensor || tensor->total <= 0) return tensor;

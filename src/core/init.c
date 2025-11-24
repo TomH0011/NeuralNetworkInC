@@ -1,6 +1,4 @@
-
-#include "RandomWeighting.h"
-#include "../Math/Tensor.h"
+#include "../../include/deepc/backend.h"
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>

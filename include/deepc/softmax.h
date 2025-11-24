@@ -1,6 +1,6 @@
 #ifndef NEURALNETWORK_SOFTMAX_H
 #define NEURALNETWORK_SOFTMAX_H
-#include "Tensor.h"
+#include "tensor.h"
 
 // computes softmax for 1d tensor
 Tensor *softmax(Tensor *tensor);

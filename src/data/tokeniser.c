@@ -1,5 +1,5 @@
-#include "tokeniser.h"
-#include "../Config/config.h"
+#include "../../include/deepc/core.h"
+#include "../../include/deepc/data.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,10 +1,8 @@
-
 #include <stdlib.h>
-#include "Tensor.h"
+#include "../../include/deepc/backend.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include <stddef.h>
 
 Tensor *createTensor(const int ndim, const size_t *shape) {
     Tensor *tensor = malloc(sizeof(Tensor));

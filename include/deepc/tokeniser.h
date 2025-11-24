@@ -1,6 +1,6 @@
 #ifndef NEURALNETWORK_TOKENISER_H
 #define NEURALNETWORK_TOKENISER_H
-#include "uthash.h"
+#include "../../vendor/uthash.h"
 
 // Hash map entry for storing frequency of integer pairs
 typedef struct {

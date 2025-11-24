@@ -1,16 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "./Config/config.h"
-#include "Tokeniser/tokeniser.h"
-#include "main.h"
-#include "./Tokeniser/RandomWeighting.h"
-#include "./Transformer/SelfAttenion.h"
+#include "include/deepc/config.h"
+#include "include/deepc/tokeniser.h"
+#include "include/deepc/main.h"
+#include "include/deepc/init.h"
+#include "include/deepc/attention.h"
 #include <windows.h>
 #include <psapi.h>
-#include <stddef.h>
-
-#include "Tokeniser/PositionalEncoding.h"
+#include "include/deepc/encoding.h"
 
 
 int main(void) {

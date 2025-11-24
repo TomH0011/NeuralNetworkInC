@@ -1,4 +1,4 @@
-#include "config.h"
+#include "../../include/deepc/core.h"
 
 int baseVocabSize = 256;
 int vocabSize = 256;         // start at base

@@ -1,6 +1,6 @@
 #ifndef NEURALNETWORK_POSITIONALENCODING_H
 #define NEURALNETWORK_POSITIONALENCODING_H
-#include "../Math/Tensor.h"
+#include "tensor.h"
 
 void addPositionalEncoding(Tensor *embeddings);
 

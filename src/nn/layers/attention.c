@@ -1,6 +1,6 @@
-#include "SelfAttenion.h"
-#include "../Math/Tensor.h"
-#include "../Math/Softmax.h"
+#include "../../../include/deepc/nn.h"
+#include "../../../include/deepc/core.h"
+#include "../../../include/deepc/backend.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

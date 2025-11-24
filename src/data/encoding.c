@@ -1,9 +1,7 @@
-#include "PositionalEncoding.h"
-#include "../Math/Tensor.h"
-#include <stdlib.h>
+#include "../../include/deepc/core.h"
+#include "../../include/deepc/data.h"
 #include<stdio.h>
 #include <math.h>
-#include "../Config/config.h"
 
 void addPositionalEncoding(Tensor *embeddings) {
     if (!embeddings) {
