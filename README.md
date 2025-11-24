@@ -1,3 +1,5 @@
+***REDUNDENT, WILL BE UPDATED SOON***
+
 Right now its just going to be a simple LLM, built in C so i can try and see where to save computation
 the goal of this is just to make the model as efficient as i can
 
