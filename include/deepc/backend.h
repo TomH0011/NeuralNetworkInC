@@ -1,0 +1,6 @@
+
+#ifndef NEURALNETWORK_BACKEND_H
+#define NEURALNETWORK_BACKEND_H
+#include "softmax.h"
+
+#endif //NEURALNETWORK_BACKEND_H

@@ -1,0 +1,50 @@
+#ifndef NEURALNETWORK_TOKENISER_H
+#define NEURALNETWORK_TOKENISER_H
+#include "../../vendor/uthash.h"
+
+// Hash map entry for storing frequency of integer pairs
+typedef struct {
+    int key1;             // first item in pair
+    int key2;             // second item in pair
+    int count;            // occurrence of pair
+    UT_hash_handle hh;    // uthash handle
+} PairMap;
+
+// applies the actual merge step and tracks vocabSize
+int *applyMergeStep(const int *encoded, int length, int *new_length);
+
+// Converts input text to a dynamically allocated char array.
+// Caller must free the returned pointer.
+char* textToChar(const char *text);
+
+// Converts input text to an array of integer token IDs.
+// Caller must free the returned pointer.
+int* encodeText(const char *text);
+
+// Converts array of tokens back into text
+char* decodeText(const int *tokenArray, size_t length);
+
+// Builds a PairMap of all consecutive integer pairs and their counts.
+// Caller must later call deletePairMap() on the returned map.
+PairMap* getPairs(const int* idArray, size_t length);
+
+// Frees all entries in the given PairMap.
+void deletePairMap(PairMap *pairMap);
+
+// Finds the most frequent pair, frees the map, and returns it as a malloc'd int[2].
+// Caller must free the returned pointer.
+int* findMaxKeyValuePairInPairMap(PairMap *pairMap);
+
+// Replaces the given pair with a new token ID in the sequence.
+// Returns a malloc'd array of new tokens (caller must free).
+int* replaceMostCommonPairWithNewByte(
+    const int *idArray,
+    const size_t length,
+    const int *mostCommonPair,
+    int newByte,
+    size_t *outNewLength);
+
+// Returns how many key-value pairs exist in the map.
+int getSizeOfPairMap(PairMap *pairMap);
+
+#endif // NEURALNETWORK_TOKENISER_H
